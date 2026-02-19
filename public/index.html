@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>test_db</title>
+  </head>
+  <body>
+    <h2>รายการสินค้าทั้งหมด (ข้อมูลจาก MySQL)</h2>
+    <div id="display"></div>
+    <script>
+      async function loadProducts() {
+        try {
+          const response = await fetch("/api/products");
+          const products = await response.json();
+
+          let html = `
+              <table border="1">
+                  <tr style="background-color: #eee;">
+                      <th>ID</th>
+                      <th>ชื่อสินค้า</th>
+                      <th>ราคา</th>
+                      <th>ประเภท</th>
+                  </tr>)`;
+
+          products.forEach((p) => {
+            html += `
+                      <tr>
+                          <td>${p.id}</td>
+                          <td>${p.name}</td>
+                          <td>${p.price}</td>
+                          <td>${p.category_name}</td>
+                      </tr>`;
+          });
+
+          html += `</table>`;
+          document.getElementById("display").innerHTML = html;
+        } catch (error) {
+          console.error("Error : ", error);
+          document.getElementById("display").innerHTML =
+            "เกิดข้อผิดพลาดในการโหลดข้อมูล";
+        }
+      }
+      loadProducts();
+    </script>
+  </body>
+</html>
