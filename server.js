@@ -5,10 +5,19 @@ const PORT = 3000;
 
 app.use(express.json());
 
+const rateLimit = require("express-rate-limit");
+
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // ช่วงเวลา 15 นาที
+  max: 100 // จำกัด 100 คำขอต่อ IP ในช่วงเวลานี้
+});
+
+app.use("/api/", limiter);
+
 app.get("/api/products", async (req, res) => {
   try {
     const sql =
-      "SELECT products.name, products.price, categories.name AS category_name " +
+      "SELECT products.id, products.name, products.price, categories.name AS category_name " +
       "FROM products JOIN categories ON products.category_id = categories.id";
     const [products] = await pool.query(sql);
     res.json(products);
