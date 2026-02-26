@@ -7,7 +7,21 @@
   </head>
   <body>
     <h2>รายการสินค้าทั้งหมด (ข้อมูลจาก MySQL)</h2>
+    <form id="fileInput" onsubmit="return false;">
+      <input type="text" id="name" placeholder="ชื่อสินค้า" required />
+      <input type="number" id="price" placeholder="ราคา" required />
+      <!-- <input type="number" id="category_id" placeholder="ID ประเภทสินค้า" required /> -->
+      <select id="categorySelect">
+        <option value="1">เครื่องใช้ไฟฟ้า</option>
+        <option value="2">อุปกรณ์ไอที</option>
+        <option value="3">เครื่องดื่ม</option>
+      </select>
+      <br />
+      <input type="file" id="image" />
+      <button type="button" onclick="saveProduct()">เพิ่มสินค้า</button>
+    </form>
     <div id="display"></div>
+    <!-- <a href=""></a> -->
     <script>
       async function loadProducts() {
         try {
@@ -15,30 +29,84 @@
           const products = await response.json();
 
           let html = `
-              <table border="1">
-                  <tr style="background-color: #eee;">
-                      <th>ID</th>
-                      <th>ชื่อสินค้า</th>
-                      <th>ราคา</th>
-                      <th>ประเภท</th>
-                  </tr>`;
+                    <table border="1">
+                        <tr style="background-color: #eee;">
+                            <th>ID</th>
+                            <th>ชื่อสินค้า</th>
+                            <th>ราคา</th>
+                            <th>ประเภท</th>
+                            <th>รูปภาพ</th>
+                            <th>ลบข้อมูล</th>
+                        </tr>`;
 
           products.forEach((p) => {
             html += `
-                      <tr>
-                          <td>${p.id}</td>
-                          <td>${p.name}</td>
-                          <td>${p.price}</td>
-                          <td>${p.category_name}</td>
-                      </tr>`;
+                            <tr>
+                                <td>${p.id}</td>
+                                <td>${p.name}</td>
+                                <td>${p.price}</td>
+                                <td>${p.category_name}</td>
+                                <td><img src="${p.image_url}" width="100" height="100"></td>
+                                <td><a href="./index.html" onclick="deleteProduct(${p.id})">ลบ</a></td>
+                            </tr>`;
           });
 
           html += `</table>`;
+
           document.getElementById("display").innerHTML = html;
         } catch (error) {
           console.error("Error : ", error);
           document.getElementById("display").innerHTML =
             "เกิดข้อผิดพลาดในการโหลดข้อมูล";
+        }
+      }
+      async function addProduct() {
+        const fileInput = document.getElementById("fileInput");
+
+        const data = {
+          name: document.getElementById("name").value,
+          price: document.getElementById("price").value,
+          category_id: document.getElementById("categorySelect").value,
+          image_name: fileInput.files[0].name,
+        };
+
+        await fetch("/api/products", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(data),
+        });
+        alert("บันทึกเรียบร้อย");
+      }
+
+      async function saveProduct() {
+        const name = document.getElementById("name").value;
+        const price = document.getElementById("price").value;
+        const category_id = document.getElementById("categorySelect").value;
+        const fileInput = document.getElementById("image");
+        const formData = new FormData();
+        formData.append("name", name);
+        formData.append("price", price);
+        formData.append("category_id", category_id);
+        if (fileInput.files[0]) {
+          formData.append("image", fileInput.files[0]);
+        }
+        const response = await fetch("/api/products", {
+          method: "POST",
+          body: formData,
+        });
+        const result = await response.json();
+        alert(result.message);
+        location.reload();
+      }
+
+      async function deleteProduct(id) {
+        if (confirm("คุณแน่ใจว่าต้องการลบสินค้านี้?")) {
+          const response = await fetch(`/api/products/${id}`, {
+        method: "DELETE",
+          });
+          const result = await response.json();
+          alert(result.message);
+          location.reload();
         }
       }
       loadProducts();
