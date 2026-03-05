@@ -53,33 +53,22 @@ app.delete("/api/products/:id", async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
-// app.delete("/api/products/:id", (req, res) => {
-//   const productId = req.params.id; // รับค่า ID จาก URL
-//   const sql = "DELETE FROM products WHERE id = ?";
+// app.put("/api/products/:id", upload.single("image"), async (req, res) => {
+//   try {
+//     const { id } = req.params;
+//     const { name, price, category_id } = req.body;
+//     const image_url = req.file
+//       ? `/images/${req.file.filename}`
+//       : req.body.image_url;
 
-//   pool.query(sql, [productId], (err, result) => {
-//     if (err) {
-//       return res.status(500).send(err);
-//     }
-//     res.send({ message: "Product deleted successfully" });
-//   });
+//     const sql = `UPDATE products SET name = ?, price = ?, image_url = ?, category_id = ? WHERE id = ?`;
+//     await pool.query(sql, [name, price, image_url, category_id, id]);
+
+//     res.json({ message: "อัปเดตสําเร็จ!" });
+//   } catch (err) {
+//     res.status(500).json({ error: err.message });
+//   }
 // });
-app.put("/api/products/:id", upload.single("image"), async (req, res) => {
-  try {
-    const { id } = req.params;
-    const { name, price, category_id } = req.body;
-    const image_url = req.file
-      ? `/images/${req.file.filename}`
-      : req.body.image_url;
-
-    const sql = `UPDATE products SET name = ?, price = ?, image_url = ?, category_id = ? WHERE id = ?`;
-    await pool.query(sql, [name, price, image_url, category_id, id]);
-
-    res.json({ message: "อัปเดตสําเร็จ!" });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
 
 app.get("/api/categories", async (req, res) => {
   const [rows] = await pool.query("SELECT * FROM categories");
@@ -94,16 +83,16 @@ app.get("/api/products/:id", async (req, res) => {
 app.put("/api/products/:id", upload.single("image"), async (req, res) => {
   try {
     const { id } = req.params;
-    const { name, category_id } = req.body;
+    const { name, price, category_id } = req.body;
     let sql, params;
 
     if (req.file) {
       const image_url = `/images/${req.file.filename}`;
-      sql = "UPDATE products SET name=?, category_id=?, image_url=? WHERE id=?";
-      params = [name, category_id, image_url, id];
+      sql = "UPDATE products SET name=?, price=?, category_id=?, image_url=? WHERE id=?";
+      params = [name, price, category_id, image_url, id];
     } else {
-      sql = "UPDATE products SET name=?, category_id=? WHERE id=?";
-      params = [name, category_id, id];
+      sql = "UPDATE products SET name=?, price=?, category_id=? WHERE id=?";
+      params = [name, price, category_id, id];
     }
 
     await pool.query(sql, params);

@@ -60,7 +60,15 @@
           รูปภาพปัจจุบัน: <br />
           <img id="current_image" src="" width="100px" />
         </p>
-        <p>เปลี่ยนรูปภาพใหม่: <input type="file" id="edit_image" /></p>
+        <p>
+          เลือกรูปใหม่:
+          <input
+            type="file"
+            id="edit_image"
+            accept="image/*"
+            onchange="previewImage(event)"
+          />
+        </p>
         <hr />
         <button onclick="saveData()">บันทึกการแก้ไข</button>
         <button onclick="closeModal()">ปิดหน้าต่าง</button>
@@ -252,6 +260,18 @@
       }
       function closeModal() {
         document.getElementById("productModal").style.display = "none";
+      }
+      function previewImage(event) {
+        const reader = new FileReader();
+        const file = event.target.files[0];
+
+        if (file) {
+          reader.onload = function () {
+            const output = document.getElementById("current_image");
+            output.src = reader.result;
+          };
+          reader.readAsDataURL(file);
+        }
       }
       loadProducts();
     </script>
